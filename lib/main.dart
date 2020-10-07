@@ -24,6 +24,20 @@ class _SIFormState extends State<SIForm> {
   var _currencies = ['JMD', 'USD', 'Pounds'];
   final double  _minimumPadding = 5.0;
 
+  var _currentItemSelected = '';
+
+  @override
+  void initState() {
+    super.initState();
+    _currentItemSelected = _currencies[0];
+  }
+
+  TextEditingController principalController = TextEditingController();
+  TextEditingController roiController       = TextEditingController();
+  TextEditingController termController      = TextEditingController();
+
+  var displayResult = '';
+
   @override
   Widget build(BuildContext context) {
 
@@ -44,6 +58,7 @@ class _SIFormState extends State<SIForm> {
                 padding: EdgeInsets.only(top: _minimumPadding, bottom: _minimumPadding),
                 child: TextField(
                   keyboardType: TextInputType.number,
+                  controller: principalController,
                   decoration: InputDecoration(
                       labelText: 'Principal',
                       hintText: 'Enter Principal e.g. 12000',
@@ -57,6 +72,7 @@ class _SIFormState extends State<SIForm> {
                 padding: EdgeInsets.only(top: _minimumPadding, bottom: _minimumPadding),
                 child: TextField(
                   keyboardType: TextInputType.number,
+                  controller: roiController,
                   decoration: InputDecoration(
                       labelText: 'Rate of Interest',
                       hintText: 'In percent',
@@ -73,6 +89,7 @@ class _SIFormState extends State<SIForm> {
 
                     Expanded(child: TextField(
                       keyboardType: TextInputType.number,
+                      controller: termController,
                       decoration: InputDecoration(
                           labelText: 'Term',
                           hintText: 'Time in years',
@@ -92,10 +109,11 @@ class _SIFormState extends State<SIForm> {
                         );
                       }).toList(),
 
-                      value: 'JMD',
+                      value: _currentItemSelected,
 
                       onChanged: (String newValueSelected) {
                         // Your code to execute, when a menu item is selected from dropdown
+                        _onDropDownItemSelected(newValueSelected);
                       },
 
                     ))
@@ -111,7 +129,9 @@ class _SIFormState extends State<SIForm> {
                     child: RaisedButton(
                       child: Text('Calculate'),
                       onPressed: () {
-
+                        setState(() {
+                          this.displayResult = _calculateTotalReturns();
+                        });
                       },
                     ),
                   ),
@@ -120,7 +140,9 @@ class _SIFormState extends State<SIForm> {
                     child: RaisedButton(
                       child: Text('Reset'),
                       onPressed: () {
-
+                        setState(() {
+                          _reset();
+                        });
                       },
                     ),
                   ),
@@ -129,7 +151,7 @@ class _SIFormState extends State<SIForm> {
 
             Padding(
               padding: EdgeInsets.all(_minimumPadding * 2),
-              child: Text('Todo Text'),
+              child: Text('Result: ' + this.displayResult),
             )
 
           ],
@@ -140,9 +162,35 @@ class _SIFormState extends State<SIForm> {
 
   Widget getImageAsset() {
 
-    //AssetImage assetImage = NetworkImage("https://www.clipartmax.com/png/middle/82-826579_banknote-united-states-dollar-money-money-vector.png"); // AssetImage('https://www.clipartmax.com/png/middle/82-826579_banknote-united-states-dollar-money-money-vector.png');
+    //AssetImage assetImage = AssetImage("/img/money.png');
     Image image = Image.network("https://www.clipartmax.com/png/middle/82-826579_banknote-united-states-dollar-money-money-vector.png"); //Image(image: assetImage, width: 125.0, height: 125.0,);
 
     return Container(child: image, margin: EdgeInsets.all(_minimumPadding * 10),);
+  }
+
+  void _onDropDownItemSelected(String newValueSelected) {
+    setState(() {
+      this._currentItemSelected = newValueSelected;
+    });
+  }
+
+  String _calculateTotalReturns() {
+
+    double principal = double.parse(principalController.text);
+    double roi = double.parse(roiController.text);
+    double term = double.parse(termController.text);
+
+    double totalAmountPayable = principal + (principal * roi * term) / 100;
+
+    String result = 'After $term years, your investment will be worth $totalAmountPayable $_currentItemSelected';
+    return result;
+  }
+
+  void _reset() {
+    principalController.text = '';
+    roiController.text = '';
+    termController.text = '';
+    displayResult = '';
+    _currentItemSelected = _currencies[0];
   }
 }
