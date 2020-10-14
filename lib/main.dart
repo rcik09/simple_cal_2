@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 void main() {
 
@@ -27,10 +28,16 @@ class _SIFormState extends State<SIForm> {
   final double  _minimumPadding = 5.0;
 
   var _currentItemSelected = '';
-
+  var displayResult = '';
+  var  history = '';
   @override
   void initState() {
+
+
     super.initState();
+    _getHistory().then((value) => {
+      history = value.toString()
+    });
     _currentItemSelected = _currencies[0];
   }
 
@@ -38,7 +45,7 @@ class _SIFormState extends State<SIForm> {
   TextEditingController roiController       = TextEditingController();
   TextEditingController termController      = TextEditingController();
 
-  var displayResult = '';
+
 
   @override
   Widget build(BuildContext context) {
@@ -179,15 +186,26 @@ class _SIFormState extends State<SIForm> {
 
                 ],)),
 
+
             Padding(
               padding: EdgeInsets.all(_minimumPadding * 2),
               child: Text('Result: ' + this.displayResult),
+            ),
+            Padding(
+              padding: EdgeInsets.all(_minimumPadding * 2),
+              child: Text('History: ' + this.history),
             )
 
           ],
         )),
       ),
     );
+  }
+
+  Future<String>  _getHistory() async {
+    SharedPreferences localDb = await SharedPreferences.getInstance();
+    String history =localDb.getString("history");
+    return history;
   }
 
   Widget getImageAsset() {
@@ -204,16 +222,29 @@ class _SIFormState extends State<SIForm> {
     });
   }
 
-  String _calculateTotalReturns() {
+_calculateTotalReturns(){
+
 
     double principal = double.parse(principalController.text);
+
     double roi = double.parse(roiController.text);
     double term = double.parse(termController.text);
 
     double totalAmountPayable = principal + (principal * roi * term) / 100;
 
+
+
     String result = 'After $term years, your investment will be worth $totalAmountPayable $_currentItemSelected';
+    setLocalStorage(result);
+
     return result;
+  }
+
+  setLocalStorage(String result) async {
+    SharedPreferences localDb = await SharedPreferences.getInstance();
+    //List<String> history =
+    localDb.setString("history","Last result: "+result);
+
   }
 
   void _reset() {
