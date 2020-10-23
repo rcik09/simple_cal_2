@@ -137,7 +137,7 @@ class _SIFormState extends State<SIForm> {
                           value: value,
                           child: Text(value),
                         );
-                      }).toList(),
+                      }).toList(),//A list was here
 
                       value: _currentItemSelected,
 
